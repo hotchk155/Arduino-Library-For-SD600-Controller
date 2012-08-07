@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////
 // LIBRARY FOR YDSCO SD600 BASED ADDRESSABLE LED STRIP
 // (c) 2012 Jason Hotchkiss 
-// blogspot.com/hotchk155
+// http://hotchk155.blogspot.co.uk/
 
 #ifndef _S600_H_
 #define _S600_H_
