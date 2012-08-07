@@ -3,6 +3,26 @@
 // (c) 2012 Jason Hotchkiss 
 // blogspot.com/hotchk155
 
+// NOTE
+//
+// We use the SPI peripheral to talk to the LED strip, so 
+// you need to connect the DAT and CLK lines to pins 11 and 13
+// accordingly. Also make sure the LED strip GND is connected 
+// to the Arduino GND
+//
+// SD600 strips that run groups of 3 LEDs at 12V usually have a 
+// problem in that the RED LEDs cannot be turned fully off. 
+// This is cos the SD600 sink outputs are pulled to +5V to 
+// turn off the LEDs, but the 7V drop from +12V to +5V is still 
+// enough to light up 3 x RED LEDs (which have a lower strike-up 
+// voltage than the other colours)
+// 
+// The solutions are either (a) put up with it and work around it 
+// by choosing your colours appropriately or (b) run the strip at 
+// 10V instead of 12V - it won't be as bright but the red LEDs 
+// should go out when not addressed.
+//
+
 #include "Arduino.h"
 #include "pins_arduino.h"
 #include "sd600.h"
@@ -12,6 +32,11 @@ volatile int sd600_numLeds = 0;
 volatile int sd600_dataLen = 0;
 volatile int sd600_dataPtr = 0;
 
+
+///////////////////////////////////////////////////////
+// The constructor allocates the buffers. It is only
+// valid to have a single instance (since there is 
+// only a single SPI peripheral anyway)
 sd600::sd600(int numLeds) 
 {    
 
@@ -35,6 +60,8 @@ sd600::sd600(int numLeds)
 	}
 }
 
+///////////////////////////////////////////////////////
+// Start updating the strip
 void sd600::begin() 
 {
 	// initialse the buffer and cue up a send
@@ -69,23 +96,32 @@ void sd600::begin()
 	SPDR=0;
 }    
 
+///////////////////////////////////////////////////////
+// Start updating the strip. The previous send must
+// have completed
 void sd600::begin_transfer() 
 {
-	sd600_dataPtr = 0;
+	if(sd600_dataPtr < 0)
+		sd600_dataPtr = 0;
 }
 
-
+///////////////////////////////////////////////////////
+// Check whether the send has completed
 int sd600::is_transfer_complete() 
 {
 	return (sd600_dataPtr < 0);
 }
 
+///////////////////////////////////////////////////////
+// Start a transfer and wait for it to complete
 void sd600::refresh() 
 {
 	sd600_dataPtr = 0;
 	while(sd600_dataPtr >= 0);
 }
 
+///////////////////////////////////////////////////////
+// Set all LEDs off and send the data
 void sd600::cls()
 {
 	for(int i = 0; i < sd600_numLeds; ++i)
@@ -93,6 +129,9 @@ void sd600::cls()
 	begin_transfer();      
 }
 
+///////////////////////////////////////////////////////
+// Set colour of a LED in local buffer (still need to
+// send it)
 void sd600::set(int index, unsigned long colour) 
 {    
 	if(index < 0 || index > sd600_dataLen)
@@ -104,6 +143,8 @@ void sd600::set(int index, unsigned long colour)
 	sd600_data[3 * index + 2] = (byte)(colour);
 }  
 
+///////////////////////////////////////////////////////
+// Get colour of a LED from local buffer
 unsigned long sd600::get(int index) 
 {
 	if(index < 0 || index > sd600_dataLen)
@@ -111,6 +152,9 @@ unsigned long sd600::get(int index)
 	return RGB(sd600_data[3 * index + 2], sd600_data[3 * index], sd600_data[3 * index + 1]);
 }  
 
+///////////////////////////////////////////////////////
+// Interrupt service routine is called each time the 
+// SPI peripheral has finished sending a byte
 ISR (SPI_STC_vect)
 {
 	// are we idle?
@@ -128,8 +172,6 @@ ISR (SPI_STC_vect)
 		// increment the data pointer, setting it back to -1 for 
 		// idle mode when we reach the end of the buffer
 		if(++sd600_dataPtr >= sd600_dataLen)
-	  sd600_dataPtr = -1;
+			sd600_dataPtr = -1;
 	}
 }
-
-
