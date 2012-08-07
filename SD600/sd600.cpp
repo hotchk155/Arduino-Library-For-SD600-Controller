@@ -134,7 +134,7 @@ void sd600::cls()
 // send it)
 void sd600::set(int index, unsigned long colour) 
 {    
-	if(index < 0 || index > sd600_dataLen)
+	if(index < 0 || index >= sd600_dataLen)
 	  return;
 	if(colour >= 0xffffffL)
 	  colour = 0xfffffeL;
@@ -147,7 +147,7 @@ void sd600::set(int index, unsigned long colour)
 // Get colour of a LED from local buffer
 unsigned long sd600::get(int index) 
 {
-	if(index < 0 || index > sd600_dataLen)
+	if(index < 0 || index >= sd600_dataLen)
 	  return 0;
 	return RGB(sd600_data[3 * index + 2], sd600_data[3 * index], sd600_data[3 * index + 1]);
 }  
