@@ -26,6 +26,7 @@ public:
 	static void refresh();
 	static void cls();
 	static void set(int index, unsigned long colour);
+	static void set_all(unsigned long *buffer);
 	static unsigned long get(int index);
 };
 
