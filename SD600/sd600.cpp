@@ -137,8 +137,7 @@ void sd600::set(int index, unsigned long colour)
 {    
 	if(index < 0 || index >= sd600_numLeds)
 	  return;
-	if(colour >= 0xffffffL)
-	  colour = 0xfffffeL;
+	colour &= 0xfefefe; // 0xff is invalid! 0x01 - meh..	
 	sd600_data[3 * index] = (byte)(colour>>16); 
 	sd600_data[3 * index + 1] = (byte)(colour>>8);
 	sd600_data[3 * index + 2] = (byte)(colour);
@@ -158,14 +157,7 @@ unsigned long sd600::get(int index)
 void sd600::set_all(unsigned long *buffer)
 {    
 	for(int index = 0; index < sd600_numLeds; ++index)
-	{
-		unsigned long colour = buffer[index];
-		if(colour >= 0xffffffL)
-		  colour = 0xfffffeL;
-		sd600_data[3 * index] = (byte)(colour>>16); 
-		sd600_data[3 * index + 1] = (byte)(colour>>8);
-		sd600_data[3 * index + 2] = (byte)(colour);
-	}
+		set(index, buffer[index]);
 }
 
 ///////////////////////////////////////////////////////

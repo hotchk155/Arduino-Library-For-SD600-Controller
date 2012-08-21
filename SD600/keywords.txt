@@ -18,6 +18,7 @@ refresh	KEYWORD2
 cls	KEYWORD2
 set	KEYWORD2
 get	KEYWORD2
+set_all	KEYWORD2
 
 #######################################
 # Constants (LITERAL1)
