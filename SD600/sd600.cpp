@@ -137,10 +137,16 @@ void sd600::set(int index, unsigned long colour)
 {    
 	if(index < 0 || index >= sd600_numLeds)
 	  return;
-	colour &= 0xfefefe; // 0xff is invalid! 0x01 - meh..	
-	sd600_data[3 * index] = (byte)(colour>>16); 
-	sd600_data[3 * index + 1] = (byte)(colour>>8);
-	sd600_data[3 * index + 2] = (byte)(colour);
+	byte g = (byte)(colour>>16);
+	byte b = (byte)(colour>>8); 
+	byte r = (byte)(colour); 
+	if(g == 255) g = 254;
+	if(b == 255) b = 254;
+	if(r == 255) r = 254;
+	
+	sd600_data[3 * index] = g;
+	sd600_data[3 * index + 1] = b;
+	sd600_data[3 * index + 2] = r;
 }  
 
 ///////////////////////////////////////////////////////
@@ -155,7 +161,7 @@ unsigned long sd600::get(int index)
 ///////////////////////////////////////////////////////
 // Set all the LEDs together
 void sd600::set_all(unsigned long *buffer)
-{    
+{   
 	for(int index = 0; index < sd600_numLeds; ++index)
 		set(index, buffer[index]);
 }
